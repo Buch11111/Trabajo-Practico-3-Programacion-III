@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-BancoUnlarApplication<unlar>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.banco.unlar.BancoUnlarApplication",
+            "projectName": "unlar",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
