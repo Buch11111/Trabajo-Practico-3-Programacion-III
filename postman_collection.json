@@ -1,0 +1,521 @@
+{
+  "info": {
+    "name": "Streaming Music REST API",
+    "description": "Colección de requests para la API REST de streaming de música estilo Spotify. Requisitos: Java 21, Spring Boot 3.x, Swagger UI disponible en http://localhost:8080/swagger-ui.html",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Canciones",
+      "item": [
+        {
+          "name": "GET - Listar todas las canciones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones"]
+            },
+            "description": "Retorna el catálogo completo de canciones con información de artista y álbum resuelta."
+          }
+        },
+        {
+          "name": "GET - Canción por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/{id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "{{cancionId}}"]
+            },
+            "description": "Busca una canción por su UUID. Reemplazar {{cancionId}} con un UUID válido del catálogo."
+          }
+        },
+        {
+          "name": "GET - Buscar con filtros compuestos (Streams API)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/buscar?genero=ROCK&ratingMinimo=4&duracionMaxima=400",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "buscar"],
+              "query": [
+                { "key": "genero", "value": "ROCK" },
+                { "key": "ratingMinimo", "value": "4" },
+                { "key": "duracionMaxima", "value": "400" }
+              ]
+            },
+            "description": "Filtra canciones por género, rating mínimo y duración máxima usando Streams API compuesto."
+          }
+        },
+        {
+          "name": "POST - Registrar reproducción (AtomicInteger concurrente)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/{id}/reproducir",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "{{cancionId}}", "reproducir"]
+            },
+            "description": "Incrementa el contador atómico de reproducciones de forma thread-safe con AtomicInteger. Diseñado para soportar concurrencia con Virtual Threads."
+          }
+        },
+        {
+          "name": "GET - Recomendaciones por género (Strategy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/{id}/recomendaciones/genero",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "{{cancionId}}", "recomendaciones", "genero"]
+            },
+            "description": "Usa la estrategia RecomendacionPorGenero: canciones del mismo género excluyendo la base. Patrón Strategy."
+          }
+        },
+        {
+          "name": "GET - Recomendaciones Top 5 global (Strategy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/recomendaciones/top5?baseId={id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "recomendaciones", "top5"],
+              "query": [{ "key": "baseId", "value": "{{cancionId}}" }]
+            },
+            "description": "Usa la estrategia RecomendacionPorPopularidad: top 5 canciones más reproducidas del catálogo."
+          }
+        },
+        {
+          "name": "GET - Recomendaciones Descubrimiento (Strategy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/{id}/recomendaciones/descubrimiento",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "{{cancionId}}", "recomendaciones", "descubrimiento"]
+            },
+            "description": "Usa la estrategia RecomendacionDescubrimiento: canciones con <1000 reproducciones, <2 años de antigüedad y género diferente."
+          }
+        },
+        {
+          "name": "GET - Top 10 más reproducidas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/top10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "top10"]
+            },
+            "description": "Top 10 canciones con mayor número de reproducciones usando Streams API."
+          }
+        },
+        {
+          "name": "GET - Playlist automática por duración exacta (Mochila/Knapsack)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/playlist?minutos=15",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "playlist"],
+              "query": [{ "key": "minutos", "value": "15" }]
+            },
+            "description": "Genera una playlist cuyas canciones suman exactamente X minutos. Algoritmo: subset sum con backtracking recursivo. Complejidad O(2^n)."
+          }
+        },
+        {
+          "name": "GET - Búsqueda binaria por título",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/busqueda-binaria?titulo=So+What",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "busqueda-binaria"],
+              "query": [{ "key": "titulo", "value": "So What" }]
+            },
+            "description": "Ordena alfabéticamente y realiza búsqueda binaria por título exacto. Complejidad O(n log n + log n)."
+          }
+        },
+        {
+          "name": "GET - Estadísticas - Promedio rating por género",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/estadisticas/promedio-por-genero",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "estadisticas", "promedio-por-genero"]
+            },
+            "description": "Calcula el rating promedio agrupado por género usando Collectors.groupingBy y averagingDouble."
+          }
+        },
+        {
+          "name": "GET - Estadísticas - Artista más popular (maxBy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/estadisticas/artista-mas-popular",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "estadisticas", "artista-mas-popular"]
+            },
+            "description": "Encuentra el artista con mayor suma de reproducciones usando maxBy sobre groupingBy."
+          }
+        },
+        {
+          "name": "GET - Estadísticas - Distribución por décadas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/estadisticas/distribucion-decadas",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "estadisticas", "distribucion-decadas"]
+            },
+            "description": "Agrupa las canciones por la década de su fecha de lanzamiento."
+          }
+        },
+        {
+          "name": "GET - Ordenamiento personalizado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/canciones/ordenar?criterio=reproducciones",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "canciones", "ordenar"],
+              "query": [{ "key": "criterio", "value": "reproducciones" }]
+            },
+            "description": "Ordena el catálogo por criterio (reproducciones, rating, duracion, fecha) usando Pattern Matching con switch."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Artistas",
+      "item": [
+        {
+          "name": "GET - Listar artistas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/artistas",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "artistas"]
+            }
+          }
+        },
+        {
+          "name": "GET - Artista por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/artistas/{id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "artistas", "{{artistaId}}"]
+            }
+          }
+        },
+        {
+          "name": "POST - Crear artista",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nuevo Artista\",\n  \"genero\": \"ROCK\",\n  \"biografia\": \"Biografía del artista\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/artistas",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "artistas"]
+            },
+            "description": "Crea un nuevo artista. El ID se genera automáticamente. Género debe ser: ROCK, POP, JAZZ, ELECTRÓNICA o CLÁSICA."
+          }
+        },
+        {
+          "name": "PUT - Actualizar artista",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Artista Actualizado\",\n  \"genero\": \"POP\",\n  \"biografia\": \"Biografía actualizada\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/artistas/{id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "artistas", "{{artistaId}}"]
+            },
+            "description": "Actualiza todos los datos de un artista existente. Género debe ser: ROCK, POP, JAZZ, ELECTRÓNICA o CLÁSICA."
+          }
+        },
+        {
+          "name": "DELETE - Eliminar artista",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/artistas/{id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "artistas", "{{artistaId}}"]
+            },
+            "description": "Elimina un artista por su UUID. Retorna 204 No Content si es exitoso, 404 si no existe."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Álbumes",
+      "item": [
+        {
+          "name": "GET - Listar álbumes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/albumes",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "albumes"]
+            }
+          }
+        },
+        {
+          "name": "GET - Álbum por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/albumes/{id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "albumes", "{{albumId}}"]
+            }
+          }
+        },
+        {
+          "name": "POST - Crear álbum",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Nuevo Álbum\",\n  \"fechaLanzamiento\": \"2024-01-15\",\n  \"artistaId\": \"{{artistaId}}\",\n  \"productoraId\": \"{{productoraId}}\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/albumes",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "albumes"]
+            },
+            "description": "Crea un nuevo álbum. El ID se genera automáticamente. Valida que el artista y la productora referenciados existan (400 si no)."
+          }
+        },
+        {
+          "name": "PUT - Actualizar álbum",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Álbum Actualizado\",\n  \"fechaLanzamiento\": \"2024-06-01\",\n  \"artistaId\": \"{{artistaId}}\",\n  \"productoraId\": \"{{productoraId}}\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/albumes/{id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "albumes", "{{albumId}}"]
+            },
+            "description": "Actualiza todos los datos de un álbum existente. Valida que el artista y la productora referenciados existan (400 si no)."
+          }
+        },
+        {
+          "name": "DELETE - Eliminar álbum",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/albumes/{id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "albumes", "{{albumId}}"]
+            },
+            "description": "Elimina un álbum por su UUID. Retorna 204 No Content si es exitoso, 404 si no existe."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Productoras",
+      "item": [
+        {
+          "name": "GET - Listar productoras",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/productoras",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "productoras"]
+            }
+          }
+        },
+        {
+          "name": "GET - Productora por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/productoras/{id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "productoras", "{{productoraId}}"]
+            }
+          }
+        },
+        {
+          "name": "POST - Crear productora",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nueva Productora\",\n  \"pais\": \"Argentina\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/productoras",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "productoras"]
+            },
+            "description": "Crea una nueva productora/discográfica. El ID se genera automáticamente."
+          }
+        },
+        {
+          "name": "PUT - Actualizar productora",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Productora Actualizada\",\n  \"pais\": \"España\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/productoras/{id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "productoras", "{{productoraId}}"]
+            },
+            "description": "Actualiza todos los datos de una productora existente."
+          }
+        },
+        {
+          "name": "DELETE - Eliminar productora",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/productoras/{id}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "productoras", "{{productoraId}}"]
+            },
+            "description": "Elimina una productora por su UUID. Retorna 204 No Content si es exitoso, 404 si no existe."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "cancionId",
+      "value": ""
+    },
+    {
+      "key": "artistaId",
+      "value": ""
+    },
+    {
+      "key": "albumId",
+      "value": ""
+    },
+    {
+      "key": "productoraId",
+      "value": ""
+    }
+  ]
+}
